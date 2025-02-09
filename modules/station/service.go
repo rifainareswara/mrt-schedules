@@ -3,13 +3,12 @@ package station
 import (
 	"encoding/json"
 	"github.com/rifainareswara/mrt-schedules.git/common/client"
-	"golang.org/x/net/html/atom"
 	"net/http"
 	"time"
 )
 
 type Service interface {
-	GetAllStations() (respons []StationResponse, err error)
+	GetAllStations() ([]StationResponse, error)
 }
 
 type service struct {
@@ -24,22 +23,27 @@ func NewService() Service {
 	}
 }
 
-func (s *service) GetAllStations() (respons []StationResponse, err error) {
-	url := "https://wwww.jakartamrt.co.id/id/val/stasiuns"
+func (s *service) GetAllStations() ([]StationResponse, error) {
+	url := "https://www.jakartamrt.co.id/id/val/stasiuns"
 
-	byteResponse, err := client.DoRequest("GET", url)
+	byteResponse, err := client.DoRequest(s.client, url)
 	if err != nil {
-		return
+		return nil, err
 	}
+
 	var stations []Station
 	err = json.Unmarshal(byteResponse, &stations)
+	if err != nil {
+		return nil, err
+	}
 
+	response := make([]StationResponse, 0, len(stations))
 	for _, station := range stations {
-		respons = append(respons, StationResponse{
-			Id:   item.Itemid,
-			Name: item.Name,
+		response = append(response, StationResponse{
+			Id:   station.Id, // Changed to match the existing struct field name
+			Name: station.Name,
 		})
 	}
 
-	return
+	return response, nil
 }
