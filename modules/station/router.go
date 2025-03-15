@@ -3,11 +3,18 @@ package station
 import "github.com/gin-gonic/gin"
 
 func Initiate(group gin.RouterGroup) {
+	stationService := NewService
 	station := group.Group("/stations")
+	station.GET("", func(c, *gin.Context) {
+		GetStations(c, stationService())
+	})
+}
 
-	station.GET("", GetStations)
-	station.GET("/:id", GetStation)
-	station.POST("", CreateStation)
-	station.PUT("/:id", UpdateStation)
-	station.DELETE("/:id", DeleteStation)
+func GetStations(c *gin.Context, service Service) {
+	datas, err := service.GetAllStations()
+	if err != nil {
+		// handle error
+	}
+
+	// handle response
 }
